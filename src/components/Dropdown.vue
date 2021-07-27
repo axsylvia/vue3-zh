@@ -14,7 +14,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from 'vue'
+import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue'
+import useClickOutside from '../hooks/useClickOutside'
 
 export default defineComponent({
   name: 'Dropdown',
@@ -26,24 +27,36 @@ export default defineComponent({
   },
   setup() {
     const isOpen = ref(false)
-    const dropdownRef = ref<null | HTMLElement>(null)
     const toggleOpen = () => {
       isOpen.value = !isOpen.value
     }
-    const handler = (e: MouseEvent) => {
-      if(dropdownRef.value) {
-        // console.log(dropdownRef.value)
-        if(!dropdownRef.value.contains(e.target as HTMLElement) && isOpen.value){
-          isOpen.value = false
-        }
+
+    const dropdownRef = ref<null | HTMLElement>(null)
+    const isClickOutside = useClickOutside(dropdownRef)
+    watch(isClickOutside,() => {
+      if (isOpen.value && isClickOutside.value){
+        // console.log(isClickOutside)
+        isOpen.value = false
       }
-    }
-    onMounted(()=>{
-      document.addEventListener('click',handler)
     })
-    onUnmounted(()=>{
-      document.removeEventListener('click',handler)
-    })
+
+    //点击外部隐藏
+    //获取dom节点并return
+    // const dropdownRef = ref<null | HTMLElement>(null)
+    // const handler = (e: MouseEvent) => {
+    //   if(dropdownRef.value) {
+    //     console.log(dropdownRef.value)
+    //     if(!dropdownRef.value.contains(e.target as HTMLElement) && isOpen.value){
+    //       isOpen.value = false
+    //     }
+    //   }
+    // }
+    // onMounted(()=>{
+    //   document.addEventListener('click',handler)
+    // })
+    // onUnmounted(()=>{
+    //   document.removeEventListener('click',handler)
+    // })
     return {
       isOpen,
       toggleOpen,
